@@ -14,8 +14,13 @@ import os # for shell commands like change directory
 import re # regular expressions
 import glob # for list of files in a directory; see http://goo.gl/rVNp22
 
-# PRELIMINARY PROGRAMS
-def get_files(myurl,folder,*Type):
+# FUNCTION TO SCRAPE FILES
+def get_files(myurl,folder,urlbase,*Type):
+	# say hello
+	print '-----'
+	print 'Scraping from %s' % myurl
+	print '-----'
+	
 	os.chdir(folder)
 	Typecheck = []
 	if type(Type[0]) == str:
@@ -26,6 +31,7 @@ def get_files(myurl,folder,*Type):
 	for t in Typecheck:
 		already = glob.glob('*.' + t + '*')
 	resp = urllib2.urlopen(myurl)
+	
 	# scrape 
 	soup = bs(resp.read(), "html.parser")
 	links = soup.find_all('a')
