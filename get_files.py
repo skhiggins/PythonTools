@@ -67,6 +67,10 @@ def get_files(myurl,folder,urlbase,*Type):
 			code.write(finalfile)
 		print "Successfully downloaded %s" % url
 
+	# say goodbye
+	print '-----'
+	print 'Finished sraping from %s' % myurl
+	print '-----'	
 
 
 
