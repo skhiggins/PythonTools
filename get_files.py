@@ -8,19 +8,26 @@
 #  last revised 3mar2018
 
 from bs4 import BeautifulSoup as bs # scraping
-import urllib2
+from urllib.parse import urlparse #parse urlbase
+from urllib.request import urlopen
 import requests
 import os # for shell commands like change directory
 import re # regular expressions
 import glob # for list of files in a directory; see http://goo.gl/rVNp22
+import urllib.parse # for modify broken url with whitespace
+import zipfile, io
 
 # FUNCTION TO SCRAPE FILES
-def get_files(myurl,folder,urlbase,*Type):
+def get_files(myurl,folder = [], overwrite = True, *Type):
 	# say hello
-	print '-----'
-	print 'Scraping from %s' % myurl
-	print '-----'
+	print ('-----')
+	print ('Scraping from %s' % myurl)
+	print ('-----')
 	
+	# urlbase = re.sub(r'http://.*/', "", myurl)
+	# print(urlbase)
+	if folder == []:
+		folder = os.getcwd()
 	os.chdir(folder)
 	Typecheck = []
 	if type(Type[0]) == str:
@@ -30,11 +37,15 @@ def get_files(myurl,folder,urlbase,*Type):
 		Typecheck = Type[0]
 	for t in Typecheck:
 		already = glob.glob('*.' + t + '*')
-	resp = urllib2.urlopen(myurl)
+	resp = urlopen(myurl)
 	
 	# scrape 
 	soup = bs(resp.read(), "html.parser")
 	links = soup.find_all('a')
+
+	parsemyurl = urlparse(myurl)
+	urlbase = parsemyurl.scheme + '://' + parsemyurl.netloc + '/' 
+	urlbase2 = parsemyurl.scheme + '://' + parsemyurl.netloc 
 
 	urls = []
 	longurls = []
@@ -46,11 +57,24 @@ def get_files(myurl,folder,urlbase,*Type):
 		for t in Typecheck:
 			if longer_url.endswith(t): 
 				if not longer_url.startswith('http://'):
-					adj_url = urlbase + longer_url
+					if longer_url.startswith('/'):
+						adj = urllib.parse.quote(longer_url)
+						adj_url = urlbase2 + adj
+					else:
+						adj_url = urlbase + longer_url
+				if adj_url.endswith('zip'):
+					try:
+						r = requests.get(adj_url)
+						z = zipfile.ZipFile(io.BytesIO(r.content))
+						z.extractall()
+					except Exception as e: 
+						print("Error downloading:  " + adj_url)
+						print(e)
+						continue
 				if adj_url in longurls: continue # for duplicates
 				url = re.sub(r'http://.*/', "", adj_url)
-				if url in already: 
-					print "%s already downloaded" % url
+				if url in already and overwrite == True: 
+					print ("%s already downloaded" % url)
 					continue # break out of loop if already downloaded
 				longurls.append(adj_url)
 				urls.append(url)
@@ -58,19 +82,16 @@ def get_files(myurl,folder,urlbase,*Type):
 
 	for url, longurl in urls_longurls:
 		try: 
-			usefulfiles = urllib2.urlopen(longurl)
+				usefulfiles = urlopen(longurl)
 		except: 
-			print "error downloading %s" % url
+			print ("error downloading %s" % url)
 			continue
 		finalfile = usefulfiles.read()
 		with open(url,'wb') as code:
 			code.write(finalfile)
-		print "Successfully downloaded %s" % url
+		print ("Successfully downloaded %s" % url)
 
 	# say goodbye
-	print '-----'
-	print 'Finished sraping from %s' % myurl
-	print '-----'	
-
-
-
+	print ('-----')
+	print ('Finished sraping from %s' % myurl)
+	print ('-----')	
