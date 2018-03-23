@@ -14,9 +14,11 @@ import requests
 import os # for shell commands like change directory
 import re # regular expressions
 import glob # for list of files in a directory; see http://goo.gl/rVNp22
+import urllib.parse # for modify broken url with whitespace
+import zipfile, io
 
 # FUNCTION TO SCRAPE FILES
-def get_files(myurl,folder = [], *Type):
+def get_files(myurl, folder = [], overwrite = True, *Type):
 	# say hello
 	print ('-----')
 	print ('Scraping from %s' % myurl)
@@ -43,6 +45,8 @@ def get_files(myurl,folder = [], *Type):
 
 	parsemyurl = urlparse(myurl)
 	urlbase = parsemyurl.scheme + '://' + parsemyurl.netloc + '/' 
+	urlbase2 = parsemyurl.scheme + '://' + parsemyurl.netloc 
+
 
 	urls = []
 	longurls = []
@@ -54,10 +58,23 @@ def get_files(myurl,folder = [], *Type):
 		for t in Typecheck:
 			if longer_url.endswith(t): 
 				if not longer_url.startswith('http://'):
-					adj_url = urlbase + longer_url
+					if longer_url.startswith('/'):
+						adj = urllib.parse.quote(longer_url)
+						adj_url = urlbase2 + adj
+					else:
+						adj_url = urlbase + longer_url
+				if adj_url.endswith('zip'):
+					try:
+						r = requests.get(adj_url)
+						z = zipfile.ZipFile(io.BytesIO(r.content))
+						z.extractall()
+					except Exception as e: 
+						print("Error downloading:  " + adj_url)
+						print(e)
+						continue
 				if adj_url in longurls: continue # for duplicates
 				url = re.sub(r'http://.*/', "", adj_url)
-				if url in already: 
+				if url in already and overwrite == True: 
 					print ("%s already downloaded" % url)
 					continue # break out of loop if already downloaded
 				longurls.append(adj_url)
@@ -66,7 +83,7 @@ def get_files(myurl,folder = [], *Type):
 
 	for url, longurl in urls_longurls:
 		try: 
-			usefulfiles = urlopen(longurl)
+				usefulfiles = urlopen(longurl)
 		except: 
 			print ("error downloading %s" % url)
 			continue
