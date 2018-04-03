@@ -1,2 +1,2 @@
 # PythonTools
-Tools for web scraping and data wrangling in Python
+Tools for web scraping and task automation in Python
