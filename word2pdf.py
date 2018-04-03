@@ -24,5 +24,5 @@ def word2pdf(in_file):
 	doc.SaveAs(out_file, FileFormat = 17) # 17 is pdf
 	doc.Close()
 	word.Quit()
-	print "Converting %s ---> %s" % (in_file, out_file)
+	print("Converting %s ---> %s" % (in_file, out_file))
 	
