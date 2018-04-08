@@ -18,7 +18,7 @@ import urllib.parse # for modify broken url with whitespace
 import zipfile, io
 
 # FUNCTION TO SCRAPE FILES
-def get_files(myurl, folder = [], overwrite = True, *Type):
+def get_files(myurl,Type, folder = [], overwrite = True):
 	# say hello
 	print ('-----')
 	print ('Scraping from %s' % myurl)
@@ -30,11 +30,13 @@ def get_files(myurl, folder = [], overwrite = True, *Type):
 		folder = os.getcwd()
 	os.chdir(folder)
 	Typecheck = []
-	if type(Type[0]) == str:
-		for typ in Type:
-			Typecheck.append(typ)	
+	if type(Type) == type([]):
+		Typecheck = Type
+	elif isinstance(Type, str):	
+		Typecheck.append(Type)
 	else:
-		Typecheck = Type[0]
+		print("Please input Type in a correct form (either as a string or a list of strings)")
+		return
 	for t in Typecheck:
 		already = glob.glob('*.' + t + '*')
 	resp = urlopen(myurl)
@@ -46,7 +48,6 @@ def get_files(myurl, folder = [], overwrite = True, *Type):
 	parsemyurl = urlparse(myurl)
 	urlbase = parsemyurl.scheme + '://' + parsemyurl.netloc + '/' 
 	urlbase2 = parsemyurl.scheme + '://' + parsemyurl.netloc 
-
 
 	urls = []
 	longurls = []
@@ -63,6 +64,8 @@ def get_files(myurl, folder = [], overwrite = True, *Type):
 						adj_url = urlbase2 + adj
 					else:
 						adj_url = urlbase + longer_url
+				else:
+					adj_url = longer_url
 				if adj_url.endswith('zip'):
 					try:
 						r = requests.get(adj_url)
