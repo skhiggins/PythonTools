@@ -77,7 +77,7 @@ def get_files(myurl,Type, folder = [], overwrite = True):
 						continue
 				if adj_url in longurls: continue # for duplicates
 				url = re.sub(r'http://.*/', "", adj_url)
-				if url in already and overwrite == True: 
+				if url in already and overwrite == False: 
 					print ("%s already downloaded" % url)
 					continue # break out of loop if already downloaded
 				longurls.append(adj_url)
