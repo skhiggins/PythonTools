@@ -86,7 +86,7 @@ def get_files(myurl,Type, folder = [], overwrite = True):
 
 	for url, longurl in urls_longurls:
 		try: 
-				usefulfiles = urlopen(longurl)
+			usefulfiles = urlopen(longurl)
 		except: 
 			print ("error downloading %s" % url)
 			continue
@@ -94,6 +94,43 @@ def get_files(myurl,Type, folder = [], overwrite = True):
 		with open(url,'wb') as code:
 			code.write(finalfile)
 		print ("Successfully downloaded %s" % url)
+
+
+
+#scrape from url hidden inside onclick
+	urlson = []
+	longurlon  = []
+	for link in links:
+		longer_urlonclick = link.get('onclick')
+		emptyOrNot = (longer_urlonclick == None)
+		if emptyOrNot == True: continue #if longer_url is empty, prevent it from causing "'NoneType' is not iterable" Error
+		for t in Typecheck:
+			if t in longer_urlonclick: 
+				findstart = re.compile('http')
+				findend = re.compile(t)
+				startnum = findstart.search(longer_urlonclick).span()[0]
+				endnumclass = findend.search(longer_urlonclick)
+				endnum = endnumclass.span()[len(endnumclass.span()) - 1]
+				adjurlon = longer_urlonclick[startnum:endnum]
+				if adjurlon in longurlon: continue # for duplicates
+				url_on = re.sub(r'http://.*/', "", adjurlon)
+				if url_on in already and overwrite == False: 
+					print ("%s already downloaded" % url)
+					continue # break out of loop if already downloaded
+				longurlon.append(adjurlon)
+				urlson.append(url_on)
+	urls_longurlson = zip(urlson,longurlon)
+
+	for onclickurl, onclicklongurl in urls_longurlson:
+		try: 
+			onclickusefulfiles = urlopen(onclicklongurl)
+		except: 
+			print ("error downloading %s" % onclickurl)
+			continue
+		onclickfinalfile = onclickusefulfiles.read()
+		with open(onclickurl,'wb') as code:
+			code.write(onclickfinalfile)
+		print ("Successfully downloaded %s" % onclickurl)
 
 	# say goodbye
 	print ('-----')
