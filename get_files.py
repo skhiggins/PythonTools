@@ -18,7 +18,7 @@ import urllib.parse # for modify broken url with whitespace
 import zipfile, io
 
 # FUNCTION TO SCRAPE FILES
-def get_files(myurl,Type, folder = [], overwrite = True):
+def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
 	# say hello
 	print ('-----')
 	print ('Scraping from %s' % myurl)
@@ -51,6 +51,7 @@ def get_files(myurl,Type, folder = [], overwrite = True):
 
 	urls = []
 	longurls = []
+	containlist = []
 
 	for link in links:
 		longer_url = link.get('href')
@@ -76,6 +77,17 @@ def get_files(myurl,Type, folder = [], overwrite = True):
 						print(e)
 						continue
 				if adj_url in longurls: continue # for duplicates
+				skipornot = False;
+				if contains != []: 
+					if isinstance(contains, str):	
+						containlist.append(contains)
+					else :
+						containlist = contains
+					for c in containlist:
+						checkname = re.compile(c)
+						if checkname.search(adj_url) == None:
+							skipornot = True
+				if skipornot: continue
 				url = re.sub(r'http://.*/', "", adj_url)
 				if url in already and overwrite == False: 
 					print ("%s already downloaded" % url)
@@ -113,6 +125,16 @@ def get_files(myurl,Type, folder = [], overwrite = True):
 				endnum = endnumclass.span()[len(endnumclass.span()) - 1]
 				adjurlon = longer_urlonclick[startnum:endnum]
 				if adjurlon in longurlon: continue # for duplicates
+				if contains != []: 
+					if isinstance(contains, str):	
+						containlist.append(contains)
+					else :
+						containlist = contains
+					for c in containlist:
+						checkname = re.compile(c)
+						if checkname.search(adjurlon) == None:
+							skipornot = True
+				if skipornot: continue
 				url_on = re.sub(r'http://.*/', "", adjurlon)
 				if url_on in already and overwrite == False: 
 					print ("%s already downloaded" % url)
