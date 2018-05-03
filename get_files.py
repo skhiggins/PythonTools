@@ -47,25 +47,26 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
 	# print(links)
 
 	parsemyurl = urlparse(myurl)
-	urlbase = parsemyurl.scheme + '://' + parsemyurl.netloc + '/' 
-	urlbase2 = parsemyurl.scheme + '://' + parsemyurl.netloc 
+	urlbase = parsemyurl.scheme + '://' + parsemyurl.netloc
+	urlbase2 = myurl.rsplit('/', 1)[0] 
 
 	urls = []
 	longurls = []
 	containlist = []
+	originallist = []
 
 	for link in links:
 		longer_url = link.get('href')
 		emptyOrNot = (longer_url == None)
 		if emptyOrNot == True: continue #if longer_url is empty, prevent it from causing "'NoneType' is not iterable" Error
 		for t in Typecheck:
-			if longer_url.endswith(t): 
+			if longer_url.endswith(t):
 				if not (longer_url.startswith('http://') or longer_url.startswith('https://')):
 					if longer_url.startswith('/'):
 						adj = urllib.parse.quote(longer_url)
-						adj_url = urlbase2 + adj
+						adj_url = urlbase + adj
 					else:
-						adj_url = urlbase + longer_url
+						adj_url = urlbase + '/' + longer_url
 				else:
 					adj_url = longer_url
 				if adj_url.endswith('zip'):
@@ -96,11 +97,15 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
 					continue # break out of loop if already downloaded
 				longurls.append(adj_url)
 				urls.append(url)
-	urls_longurls = zip(urls,longurls)
+				originallist.append(longer_url)
+	urls_longurls = zip(urls,longurls, originallist)
 
-	for url, longurl in urls_longurls:
+	for url, longurl, original in urls_longurls:
 		try: 
-			usefulfiles = urlopen(longurl)
+			try:
+				usefulfiles = urlopen(longurl)
+			except:
+				usefulfiles = urlopen(urlbase2 + "/" + original)
 		except: 
 			print ("error downloading %s" % url)
 			continue
