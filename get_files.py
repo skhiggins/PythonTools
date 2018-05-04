@@ -106,8 +106,9 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
 				usefulfiles = urlopen(longurl)
 			except:
 				usefulfiles = urlopen(urlbase2 + "/" + original)
-		except: 
+		except Exception as e: 
 			print ("error downloading %s" % url)
+			print(e)
 			continue
 		finalfile = usefulfiles.read()
 		with open(url,'wb') as code:
