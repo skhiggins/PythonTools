@@ -15,20 +15,43 @@ import os # for shell commands like change directory
 import re # regular expressions
 import glob # for list of files in a directory; see http://goo.gl/rVNp22
 import urllib.parse # for modify broken url with whitespace
-import zipfile, io
+import zipfile, io #for zip file 
+from selenium import webdriver #use selenium for the dynamic content 
+
+
+
+
 
 # FUNCTION TO SCRAPE FILES
-def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
+def get_files(myurl,Type, folder = [], overwrite = True, contains = [], count = 0):
 	# say hello
-	print ('-----')
-	print ('Scraping from %s' % myurl)
-	print ('-----')
-	
-	# urlbase = re.sub(r'http://.*/', "", myurl)
-	# print(urlbase)
-	if folder == []:
-		folder = os.getcwd()
-	os.chdir(folder)
+
+	# count is the variable to count how many urls we have urlopen yet
+	# It is used to decide whether to use Selenium to scrape dynamic content or not 
+	if count == 0:
+		print ('-----')
+		print ('Scraping from %s' % myurl)
+		print ('-----')
+		if folder == []:
+			folder = os.getcwd()
+		os.chdir(folder)
+		resp = urlopen(myurl)
+		
+		# scrape 
+		soup = bs(resp.read(), "html.parser")
+		links = soup.find_all("a")
+	else:
+		# using the selenium to immitate a person manully open the website and click the js to get the html
+		option = webdriver.ChromeOptions()
+		option.add_argument("— incognito")
+		browser = webdriver.Chrome(executable_path="/Applications/chromedriver", chrome_options=option)
+		browser.get(myurl)
+		html = browser.page_source
+
+		# scrape
+		soup = bs(html, "lxml")
+		links = soup.find_all('a')
+
 	Typecheck = []
 	if type(Type) == type([]):
 		Typecheck = Type
@@ -38,13 +61,7 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
 		print("Please input Type in a correct form (either as a string or a list of strings)")
 		return
 	for t in Typecheck:
-		already = glob.glob('*.' + t + '*')
-	resp = urlopen(myurl)
-	
-	# scrape 
-	soup = bs(resp.read(), "html.parser")
-	links = soup.find_all('a')
-	# print(links)
+			already = glob.glob('*.' + t + '*')	
 
 	parsemyurl = urlparse(myurl)
 	urlbase = parsemyurl.scheme + '://' + parsemyurl.netloc
@@ -104,10 +121,12 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
 		try: 
 			try:
 				usefulfiles = urlopen(longurl)
+				count += 1
 			except:
 				usefulfiles = urlopen(urlbase2 + "/" + original)
-		except: 
+		except Exception as e: 
 			print ("error downloading %s" % url)
+			print(e)
 			continue
 		finalfile = usefulfiles.read()
 		with open(url,'wb') as code:
@@ -152,6 +171,7 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
 
 	for onclickurl, onclicklongurl in urls_longurlson:
 		try: 
+			count += 1
 			onclickusefulfiles = urlopen(onclicklongurl)
 		except: 
 			print ("error downloading %s" % onclickurl)
@@ -160,8 +180,15 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = []):
 		with open(onclickurl,'wb') as code:
 			code.write(onclickfinalfile)
 		print ("Successfully downloaded %s" % onclickurl)
+	
+	# if there is no pdf 
+	if count == 0:
+		count += 1
+		get_files(myurl,Type, folder, overwrite, contains, count = count)
+	else:
+		# say goodbye
+		print ('-----')
+		print ('Finished sraping from %s' % myurl)
+		print ('-----')	
 
-	# say goodbye
-	print ('-----')
-	print ('Finished sraping from %s' % myurl)
-	print ('-----')	
+
