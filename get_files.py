@@ -24,14 +24,15 @@ from selenium import webdriver #use selenium for the dynamic content
 
 # FUNCTION TO SCRAPE FILES
 def get_files(myurl,Type, folder = [], overwrite = True, contains = [], count = 0):
-	# say hello
 	# count is the variable to count how many urls we have urlopen yet
 	# It is used to decide whether to use Selenium to scrape dynamic content or not 
 	# if you want to use the selenium to scrape the content anyway, set count to -1
 	helper_count = count
 	if helper_count == -1:
 		count = 0
+
 	if count == 0:
+    # say hello
 		print ('-----')
 		print ('Scraping from %s' % myurl)
 		print ('-----')
@@ -47,7 +48,7 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = [], count = 
 		# using the selenium to immitate a person manully open the website and click the js to get the html
 		option = webdriver.ChromeOptions()
 		option.add_argument("— incognito")
-        # change this line to the place where you download your Chrome web driver
+    # change this line to the place where you download your Chrome web driver
 		browser = webdriver.Chrome(executable_path="/Applications/chromedriver", chrome_options=option)
 		browser.get(myurl)
 		html = browser.page_source
@@ -192,7 +193,6 @@ def get_files(myurl,Type, folder = [], overwrite = True, contains = [], count = 
 		print ('-----')
 		print ('Finished sraping from %s' % myurl)
 		print ('-----')
-
 
 
 
