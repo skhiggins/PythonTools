@@ -9,7 +9,6 @@ def crop_eps(filename, outfile = [], l = -1, b = -1, r = -1, t = -1):
 		toopen = filename
 	else:
 		toopen = outfile
-		eps_outfile = open(outfile, 'w')
 	
 	# Write lines, replacing the lines setting bounding box
 	dim_args = [l, b, r, t]
