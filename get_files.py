@@ -69,7 +69,7 @@ def get_files(myurl,Type, folder = [], overwrite = True,
 	else:
 		try: 
 			option = webdriver.ChromeOptions()
-			option.add_argument("— incognito")
+			option.add_argument("--incognito")
 			if filepath == []:
 				browser = webdriver.Chrome(executable_path="/Applications/chromedriver", chrome_options=option)
 			else:
