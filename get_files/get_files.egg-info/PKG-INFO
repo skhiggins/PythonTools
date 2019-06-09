@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: get-files
+Version: 0.1
+Summary: Package to automate downloading files from a website using web      scraping when a url and the file extensions are provided
+Home-page: hhttps://github.com/skhiggins/PythonTools
+Author: Sean Higgins & Angelyna Ye
+Author-email: seanhiggins@berkeley.edu       angelynaye@berkeley.edu
+License: Berkeley
+Description: UNKNOWN
+Platform: UNKNOWN
